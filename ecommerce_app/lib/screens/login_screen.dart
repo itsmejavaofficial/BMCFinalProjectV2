@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 class MyApp extends StatelessWidget {
-  // ... (const MyApp)
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +14,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      // 1. Change this line
-      home: const LoginScreen(), // 2. Set LoginScreen as the home
+
+      home: const LoginScreen(),
     );
   }
 }
@@ -29,32 +28,29 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-// 2. This is the State class
+
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
 
   Future<void> _login() async {
-    // 1. Check if the form is valid
+
     if (!_formKey.currentState!.validate()) {
-      return; // If not valid, stop here
+      return;
     }
 
-    // 2. Set loading to true
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // 3. This is the Firebase command to sign in
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // 4. If login is successful, the AuthWrapper's stream
-      //    will auto-navigate to HomeScreen. We don't need to do it here.
 
     } on FirebaseAuthException catch (e) {
       // 5. This 'catch' block handles Firebase-specific errors

@@ -1,12 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart'; // 1. ADD THIS IMPORT
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:ecommerce_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 
 
 
 class MyApp extends StatelessWidget {
-  // ... (const MyApp)
 
   @override
   Widget build(BuildContext context) {
@@ -16,8 +15,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
       ),
-      // 1. Change this line
-      home: const SignUpScreen(), // 2. Set LoginScreen as the home
+      home: const SignUpScreen(),
     );
   }
 }
@@ -54,11 +52,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         password: _passwordController.text.trim(),
       );
 
-      // 4. --- THIS IS THE NEW PART ---
-      // After creating the user, save their info to Firestore
+
       if (userCredential.user != null) {
-        // 5. Create a document in a 'users' collection
-        //    We use the user's unique UID as the document ID
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'email': _emailController.text.trim(),
           'role': 'user', // 6. Set the default role to 'user'
@@ -167,13 +162,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
 
 
-                // 6. A spacer
+
                 const SizedBox(height: 10),
 
-                // 7. The "Sign Up" toggle button
+
                 TextButton(
                   onPressed: () {
-                    // 8. Navigate to the Sign Up screen
+
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (context) => const LoginScreen(),
@@ -185,7 +180,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
 
 
-                // The Form Fields will go here
               ],
             ),
           ),
@@ -195,14 +189,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
 
-  // 3. Create a GlobalKey for the Form
   final _formKey = GlobalKey<FormState>();
 
-  // 4. Create TextEditingControllers
+
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // 5. Clean up controllers when the widget is removed
+
   @override
   void dispose() {
     _emailController.dispose();

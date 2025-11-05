@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ecommerce_app/screens/admin_panel_screen.dart';
 import 'package:ecommerce_app/screens/product_detail_screen.dart';
-import '../widgets/product_card.dart'; // ✅ your ProductCard import
+import '../widgets/product_card.dart';
 
 
 

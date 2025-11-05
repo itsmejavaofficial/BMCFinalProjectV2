@@ -14,7 +14,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Wrap the app with Provider before runApp
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => CartProvider(),
