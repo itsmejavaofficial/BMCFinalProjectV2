@@ -4,13 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:ecommerce_app/screens/admin_panel_screen.dart';
 import 'package:ecommerce_app/screens/product_detail_screen.dart';
 import '../widgets/product_card.dart';
-import 'package:ecommerce_app/screens/order_history_screen.dart';
+
+
+
 import 'package:ecommerce_app/providers/cart_provider.dart';
 import 'package:ecommerce_app/screens/cart_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:ecommerce_app/screens/profile_screen.dart'; // 1. ADD THIS
-import 'package:ecommerce_app/widgets/notification_icon.dart';
-import 'package:ecommerce_app/screens/chat_screen.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -23,19 +22,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String _userRole = 'user'; // default role
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   bool _isLoadingRole = true;
-
-  // FIX 1: Define the _currentUser variable
-  User? _currentUser;
-
 
   @override
   void initState() {
     super.initState();
-    // FIX 2: Initialize _currentUser
-    _currentUser = _auth.currentUser;
     _fetchUserRole();
   }
 
@@ -71,57 +62,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
 
-  // FIX 3: Remove the old logout function, as it is now in ProfileScreen
-  // void _logout() async { await _auth.signOut(); }
+  void _logout() async {
+    await _auth.signOut();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoadingRole) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        centerTitle: false,
-        // 2. ADD this new title:
-        title: Image.asset(
-          'assets/images/app_logo.png', // 3. The path to your logo
-          height: 40, // 4. Set a fixed height
-        ),
+        title: const Text('Home'),
+        centerTitle: true,
         actions: [
-          // 🛒 Cart (only visible for regular users)
-          if (_userRole == 'user')
-            Consumer<CartProvider>(
-              builder: (context, cart, child) {
-                return Badge(
-                  label: Text(cart.items.length.toString()),
-                  isLabelVisible: cart.items.isNotEmpty,
-                  backgroundColor: Colors.red,
-                  child: IconButton(
-                    icon: const Icon(Icons.shopping_cart),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => const CartScreen()),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-
-          // 2. --- ADD OUR NEW WIDGET ---
-          const NotificationIcon(),
-
-
-          IconButton(
-            icon: const Icon(Icons.receipt_long), // A "receipt" icon
-            tooltip: 'My Orders',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const OrderHistoryScreen(),
-                ),
-              );
-            },
-          ),
-
-
           // 👑 Admin button (only visible for admins)
           if (_userRole == 'admin')
             IconButton(
@@ -134,19 +91,29 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
 
-          // FIX 5: DELETED the old "Logout" IconButton
+          // 🛒 Cart (only visible for regular users)
+          if (_userRole == 'user')
+            Consumer<CartProvider>(
+              builder: (context, cart, child) {
+                return Badge(
+                  label: Text(cart.itemCount.toString()),
+                  isLabelVisible: cart.itemCount > 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.shopping_cart),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => const CartScreen()),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
 
-          // 6. ADD this new "Profile" IconButton
+          // 🚪 Logout (always visible)
           IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProfileScreen(),
-                ),
-              );
-            },
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
           ),
         ],
 
@@ -207,52 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         },
       ),
-
-        // 1. --- REPLACE YOUR 'floatingActionButton:' ---
-        floatingActionButton: _userRole == 'user' && _currentUser != null
-            ? StreamBuilder<DocumentSnapshot>( // 2. A new StreamBuilder
-          // 3. Listen to *this user's* chat document
-            stream: _firestore.collection('chats').doc(_currentUser!.uid).snapshots(),
-            builder: (context, snapshot) {
-
-              int unreadCount = 0;
-              // 4. Check if the doc exists and has our count field
-              if (snapshot.hasData && snapshot.data!.exists) {
-                // Ensure data is not null before casting
-                final data = snapshot.data!.data();
-                if (data != null) {
-                  unreadCount = (data as Map<String, dynamic>)['unreadByUserCount'] ?? 0;
-                }
-              }
-
-              // 5. --- THE FIX for "trailing not defined" ---
-              //    We wrap the FAB in the Badge widget
-              return Badge(
-                // 6. Show the count in the badge
-                label: Text('$unreadCount'),
-                // 7. Only show the badge if the count is > 0
-                isLabelVisible: unreadCount > 0,
-                // 8. The FAB is now the *child* of the Badge
-                child: FloatingActionButton.extended(
-                  icon: const Icon(Icons.support_agent),
-                  label: const Text('Contact Admin'),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          chatRoomId: _currentUser!.uid,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              );
-              // --- END OF FIX ---
-            },
-        )
-            : null, // 9. If admin, don't show the FAB
     );
   }
 }
-
 
