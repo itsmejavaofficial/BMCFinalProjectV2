@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:ecommerce_app/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+// 1. Changed from StatelessWidget to StatefulWidget
+class ProductDetailScreen extends StatefulWidget {
+
   final Map<String, dynamic> productData;
   final String productId;
 
@@ -13,14 +15,47 @@ class ProductDetailScreen extends StatelessWidget {
   });
 
   @override
+  // 2. Created the State class
+  State<ProductDetailScreen> createState() => _ProductDetailScreenState();
+}
+
+// 3. The new State class
+class _ProductDetailScreenState extends State<ProductDetailScreen> {
+
+  // 4. ADD OUR NEW STATE VARIABLE FOR QUANTITY, starting at 1
+  int _quantity = 1;
+
+  // 1. ADD THIS FUNCTION
+  void _incrementQuantity() {
+    setState(() {
+      _quantity++;
+    });
+  }
+
+
+  // 2. ADD THIS FUNCTION
+  void _decrementQuantity() {
+    // We don't want to go below 1
+    if (_quantity > 1) {
+      setState(() {
+        _quantity--;
+      });
+    }
+  }
+
+
+  // 5. The build method is now inside the State class
+  @override
   Widget build(BuildContext context) {
-    // 🧠 Get provider instance (no rebuild needed)
+    // 1. Access productData using 'widget.'
+    final String name = widget.productData['name'];
+    final String description = widget.productData['description'];
+    final String imageUrl = widget.productData['imageUrl'];
+    final double price = (widget.productData['price'] as num? ?? 0.0).toDouble();
+
+    // 2. Get the CartProvider (same as before)
     final cart = Provider.of<CartProvider>(context, listen: false);
 
-    final String name = productData['name'] ?? 'No Name';
-    final String description = productData['description'] ?? 'No Description';
-    final double price = (productData['price'] ?? 0).toDouble();
-    final String imageUrl = productData['imageUrl'] ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -52,7 +87,7 @@ class ProductDetailScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     name,
@@ -67,6 +102,7 @@ class ProductDetailScreen extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 20,
                       color: Colors.green,
+                      fontFamily: 'Roboto',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -74,28 +110,62 @@ class ProductDetailScreen extends StatelessWidget {
                   const SizedBox(height: 30),
 
 
+                  // 4. --- NEW QUANTITY SELECTOR SECTION ---
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // 5. DECREMENT BUTTON
+                      IconButton.filledTonal(
+                        icon: const Icon(Icons.remove),
+                        onPressed: _decrementQuantity, // Calls our new state function
+                      ),
+
+                      // 6. QUANTITY DISPLAY
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Text(
+                          '$_quantity', // 7. Displays our state variable
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+
+                      // 8. INCREMENT BUTTON
+                      IconButton.filled(
+                        icon: const Icon(Icons.add),
+                        onPressed: _incrementQuantity, // Calls our new state function
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // --- END OF NEW SECTION ---
+
 
                   // 🛒 Add to Cart button
                   ElevatedButton.icon(
                     onPressed: () {
-                      // Add to cart logic
-                      cart.addItem(productId, name, price);
+                      // 10. --- UPDATED LOGIC ---
+                      // We now pass the _quantity from our state
+                      cart.addItem(
+                        widget.productId,
+                        name,
+                        price,
+                        _quantity, // 11. Pass the selected quantity
+                      );
 
-                      // Feedback Snackbar
+                      // 12. Feedback Snackbar with quantity
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Added to cart!'),
-                          duration: Duration(seconds: 2),
+                        SnackBar(
+                          content: Text('Added $_quantity x $name to cart!'),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     },
                     icon: const Icon(Icons.shopping_cart_outlined),
                     label: const Text('Add to Cart'),
                     style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 40,
-                        vertical: 15,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(fontSize: 18),
                     ),
                   ),
                 ],
