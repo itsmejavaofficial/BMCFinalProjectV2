@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_app/screens/admin_order_screen.dart'; // 1. ADD THIS
+import 'package:ecommerce_app/screens/admin_chat_list_screen.dart';
+
+
+
 
 class AdminPanelScreen extends StatefulWidget {
   const AdminPanelScreen({super.key});
@@ -90,7 +95,7 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin - Add Product'),
+        title: const Text('Admin Panel'),
       ),
       // 1. Lets the user scroll if the keyboard covers the fields
       body: SingleChildScrollView(
@@ -102,6 +107,54 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // 3. --- ADD THIS NEW BUTTON ---
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.list_alt),
+                  label: const Text('Manage All Orders'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // A different color
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                  onPressed: () {
+                    // 4. Navigate to our new screen
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AdminOrderScreen(),
+                      ),
+                    );
+                  },
+                ),
+
+                // 3. --- ADD THIS NEW BUTTON ---
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  icon: const Icon(Icons.chat_bubble_outline),
+                  label: const Text('View User Chats'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AdminChatListScreen(),
+                      ),
+                    );
+                  },
+                ),
+
+
+                // 5. A divider to separate it
+                const Divider(height: 30, thickness: 1),
+
+                const Text(
+                  'Add New Product',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+
+
 
                 // 4. The "Image URL" text field
                 TextFormField(
@@ -155,6 +208,8 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
+
+
 
                 // 8. The "Upload" Button
                 ElevatedButton(
